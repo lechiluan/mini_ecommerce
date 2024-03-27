@@ -6,7 +6,7 @@ defmodule MiniEcommerce.Repo.Migrations.CreateProducts do
       add :product_code, :string
       add :product_name, :string
       add :selling_price, :decimal
-      add :brand_id, references(:brand, on_delete: :nothing)
+      add :brand_id, references(:brands, on_delete: :nothing)
 
       timestamps()
     end
