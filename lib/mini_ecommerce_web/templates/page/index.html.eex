@@ -1,38 +1,33 @@
-<section class="phx-hero">
-  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
-  <p>Peace of mind from prototype to production</p>
-</section>
+<div class="container">
+  <h1>Product List</h1>
+  <div class="search-container">
+    <input type="text" id="search-input" placeholder="Search by product code or name">
+    <button id="search-btn">Search</button>
+  </div>
+  <div class="button-container">      
+    <button id="add-product-btn">Add Product</button>
+  </div>
+  <div id="product-list"></div> 
+</div>
 
-<section class="row">
-  <article class="column">
-    <h2>Resources</h2>
-    <ul>
-      <li>
-        <a href="https://hexdocs.pm/phoenix/overview.html">Guides &amp; Docs</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix">Source</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix/blob/v1.5/CHANGELOG.md">v1.5 Changelog</a>
-      </li>
-    </ul>
-  </article>
-  <article class="column">
-    <h2>Help</h2>
-    <ul>
-      <li>
-        <a href="https://elixirforum.com/c/phoenix-forum">Forum</a>
-      </li>
-      <li>
-        <a href="https://webchat.freenode.net/?channels=elixir-lang">#elixir-lang on Freenode IRC</a>
-      </li>
-      <li>
-        <a href="https://twitter.com/elixirphoenix">Twitter @elixirphoenix</a>
-      </li>
-      <li>
-        <a href="https://elixir-slackin.herokuapp.com/">Elixir on Slack</a>
-      </li>
-    </ul>
-  </article>
-</section>
+<!-- Modal -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2 id="modal-title"></h2>
+    <form>
+      <input type="hidden" id="product-id" />
+      <label for="product-code">Product Code</label>
+      <input type="text" id="product-code" required />
+      <label for="product-name">Product Name</label>
+      <input type="text" id="product-name" required />
+      <label for="selling-price">Selling Price</label>
+      <input type="number" id="selling-price" step="0.01" required />
+      <label for="brand-select">Brand</label>
+      <select id="brand-select" required>
+        <option value="">Select a brand</option>
+      </select>
+      <button type="submit" id="modal-submit">Submit</button>
+    </form>
+  </div>
+</div>

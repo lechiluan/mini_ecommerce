@@ -8,6 +8,6 @@ defmodule MiniEcommerce.Repo.Migrations.CreateBrands do
       timestamps()
     end
 
-    create index(:brand, [:name])
+    create index(:brands, [:name])
   end
 end

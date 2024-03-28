@@ -24,6 +24,12 @@ defmodule MiniEcommerceWeb.Router do
   #   pipe_through :api
   # end
 
+  scope "/api", MiniEcommerceWeb do
+    pipe_through :api
+
+    resources "/products", ProductController, except: [:new, :edit]
+    resources "/brands", BrandController, except: [:new, :edit]
+  end
   # Enables LiveDashboard only for development
   #
   # If you want to use the LiveDashboard in production, you should put
