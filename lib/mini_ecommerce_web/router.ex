@@ -17,6 +17,8 @@ defmodule MiniEcommerceWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    
+    get "/order", OrderController, :index
   end
 
   # Other scopes may use custom stacks.
@@ -29,6 +31,8 @@ defmodule MiniEcommerceWeb.Router do
 
     resources "/products", ProductController, except: [:new, :edit]
     resources "/brands", BrandController, except: [:new, :edit]
+    resources "/customers", CustomerController, except: [:new, :edit]
+
   end
   # Enables LiveDashboard only for development
   #

@@ -219,18 +219,20 @@ function handleDelete(productId) {
 
 
 function handleSearch() {
-    const searchInput = document.getElementById('search-input').value.toLowerCase();
+    const searchInput = document.getElementById('search-input').value.trim().toLowerCase();
+    const searchTerms = searchInput.split(' '); // Split the search input into an array of terms
     const products = document.getElementById('product-list').children;
 
     for (let product of products) {
         const productCode = product.querySelector('p:nth-child(2)').textContent.toLowerCase();
         const productName = product.querySelector('p:nth-child(3)').textContent.toLowerCase();
-        if (productCode.includes(searchInput) || productName.includes(searchInput)) {
-            product.style.display = 'block';
-        } else {
-            // Display Message
-            product.style.display = 'none';
-        }
+        const brandName = product.querySelector('p:nth-child(6)').textContent.toLowerCase();
+
+        const shouldDisplay = searchTerms.every(term => {
+            return productCode.includes(term) || productName.includes(term) || brandName.includes(term);
+        });
+
+        product.style.display = shouldDisplay ? 'block' : 'none';
     }
 }
 
@@ -256,17 +258,4 @@ document.addEventListener('DOMContentLoaded',async () => {
 
     const modalSubmitBtn = document.getElementById('modal-submit');
     modalSubmitBtn.addEventListener('click', handleFormSubmit);
-
-    searchInput.addEventListener('input', () => {
-        displayProducts(products);
-    });
-
-    minPriceInput.addEventListener('input', () => {
-        displayProducts(products);
-    });
-
-    maxPriceInput.addEventListener('input', () => {
-        displayProducts(products);
-    });
-    
 });

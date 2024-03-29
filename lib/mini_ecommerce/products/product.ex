@@ -1,7 +1,7 @@
 defmodule MiniEcommerce.Products.Product do
   use Ecto.Schema
   import Ecto.Changeset
-  
+
   # create a schema for the products table
   schema "products" do
     field :product_code, :string

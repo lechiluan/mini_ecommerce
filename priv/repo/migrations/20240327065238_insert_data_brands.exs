@@ -5,11 +5,13 @@ defmodule MiniEcommerce.Repo.Migrations.InsertDataBrands do
   def up do
     execute("INSERT INTO brands (name, inserted_at, updated_at) VALUES ('Apple', NOW(), NOW())")
     execute("INSERT INTO brands (name, inserted_at, updated_at) VALUES ('Samsung', NOW(), NOW())")
+    execute "INSERT INTO brands (name, inserted_at, updated_at) VALUES ('Xiaomi', NOW(), NOW())"
   end
 
   # use to rollback the migration
   def down do
     execute("DELETE FROM brands WHERE name = 'Apple'")
     execute("DELETE FROM brands WHERE name = 'Samsung'")
+    execute("DELETE FROM brands WHERE name = 'Xiaomi'")
   end
 end

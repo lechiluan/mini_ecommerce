@@ -1,11 +1,11 @@
 <div class="container">
   <h1>Product List</h1>
-  <div class="search-container">
-    <input type="text" id="search-input" placeholder="Search by product code or name">
-    <button id="search-btn">Search</button>
-  </div>
   <div class="button-container">      
     <button id="add-product-btn">Add Product</button>
+  </div>
+  <div class="search-container">
+    <input type="text" id="search-input" placeholder="Search by product code or name or brand">
+    <button id="search-btn">Search</button>
   </div>
   <div id="product-list"></div> 
 </div>
