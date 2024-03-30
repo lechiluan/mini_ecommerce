@@ -1,7 +1,40 @@
-defmodule MiniEcommerceWeb.OrderController  do
+defmodule MiniEcommerceWeb.OrderController do
   use MiniEcommerceWeb, :controller
 
+  alias MiniEcommerce.Orders
+  alias MiniEcommerce.Orders.Order
+
   def index(conn, _params) do
-    render(conn, "order.html")
+    orders = Orders.list_orders()
+    render(conn, "index.json", orders: orders)
+  end
+
+  def show(conn, %{"id" => id}) do
+    order = Orders.get_order!(id)
+    render(conn, "show.json", order: order)
+  end
+
+  def create(conn, %{"order" => order_params}) do
+    with {:ok, %Order{} = order} <- Orders.create_order(order_params) do
+      conn
+      |> put_status(:created)
+      |> render("show.json", order: order)
+    end
+  end
+
+  def update(conn, %{"id" => id, "order" => order_params}) do
+    order = Orders.get_order!(id)
+
+    with {:ok, %Order{} = order} <- Orders.update_order(order, order_params) do
+      render(conn, "show.json", order: order)
+    end
+  end
+
+  def delete(conn, %{"id" => id}) do
+    order = Orders.get_order!(id)
+
+    with {:ok, %Order{}} <- Orders.delete_order(order) do
+      send_resp(conn, :no_content, "")
+    end
   end
 end

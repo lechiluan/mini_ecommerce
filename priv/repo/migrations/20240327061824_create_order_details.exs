@@ -3,8 +3,8 @@ defmodule MiniEcommerce.Repo.Migrations.CreateOrderDetails do
 
   def change do
     create table(:order_details) do
-      add :order_code, references(:orders, on_delete: :nothing)
-      add :product_code, references(:products, on_delete: :nothing)
+      add :order_code, :string
+      add :product_code, :string
       add :selling_price, :decimal, precision: 10, scale: 2
       add :quantity, :integer
       add :product_name, :string
@@ -12,7 +12,6 @@ defmodule MiniEcommerce.Repo.Migrations.CreateOrderDetails do
       timestamps()
     end
 
-    # use index to speed up the search process
     create index(:order_details, [:order_code])
     create index(:order_details, [:product_code])
     create index(:order_details, [:product_name])
