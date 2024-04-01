@@ -40,4 +40,11 @@ defmodule MiniEcommerceWeb.OrderDetailController do
       send_resp(conn, :no_content, "")
     end
   end
+
+  @spec get_order_detail_by_order_code(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def get_order_detail_by_order_code(conn, %{"order_code" => order_code}) do
+    order_details = OrderDetails.get_order_detail_by_order_code(order_code)
+    render(conn, "index.json", order_details: order_details)
+  end
+
 end

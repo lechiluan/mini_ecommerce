@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order List</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Order List</h1>
+  <table id="orderTable">
+    <thead>
+      <tr>
+        <th>No.</th>
+        <th>Order Code</th>
+        <th>Customer Name</th>
+        <th>Total Price</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Order Details</h2>
+  <table id="orderDetailsTable">
+    <thead>
+      <tr>
+        <th>No.</th>
+        <th>Product Code</th>
+        <th>Product Name</th>
+        <th>Selling Price</th>
+        <th>Quantity</th>
+        <th>Unit Total</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const orderTable = document.getElementById('orderTable').getElementsByTagName('tbody')[0];
+    const orderDetailsTable = document.getElementById('orderDetailsTable').getElementsByTagName('tbody')[0];
+
+    fetchOrders();
+
+    function fetchOrders() {
+      fetch('http://localhost:4000/api/orders/')
+        .then(response => response.json())
+        .then(data => {
+          renderOrderTable(data.data);
+        })
+        .catch(error => console.error('Error fetching orders:', error));
+    }
+
+    function renderOrderTable(orders) {
+      orderTable.innerHTML = '';
+
+      orders.forEach(order => {
+        const row = orderTable.insertRow();
+        const noCell = row.insertCell(0);
+        const orderCodeCell = row.insertCell(1);
+        const customerNameCell = row.insertCell(2);
+        const totalPriceCell = row.insertCell(3);
+        const actionCell = row.insertCell(4);
+
+        noCell.textContent = orderTable.rows.length;
+        orderCodeCell.textContent = order.order_code;
+        customerNameCell.textContent = order.customer_name;
+        totalPriceCell.textContent = order.total_price;
+        actionCell.innerHTML = `<button onclick="showOrderDetails('${order.order_code}')">Show Details</button>`;
+      });
+    }
+
+    function showOrderDetails(orderCode) {
+      fetch(`http://localhost:4000/api/get_order_detail_by_order_code/${orderCode}`)
+        .then(response => response.json())
+        .then(data => {
+          renderOrderDetailsTable(data.data);
+        })
+        .catch(error => console.error('Error fetching order details:', error));
+    }
+
+    function renderOrderDetailsTable(orderDetails) {
+      orderDetailsTable.innerHTML = '';
+
+      orderDetails.forEach(detail => {
+        const row = orderDetailsTable.insertRow();
+        const noCell = row.insertCell(0);
+        const productCodeCell = row.insertCell(1);
+        const productNameCell = row.insertCell(2);
+        const sellingPriceCell = row.insertCell(3);
+        const quantityCell = row.insertCell(4);
+        const unitTotalCell = row.insertCell(5);
+
+        noCell.textContent = orderDetailsTable.rows.length;
+        productCodeCell.textContent = detail.product_code;
+        productNameCell.textContent = detail.product_name;
+        sellingPriceCell.textContent = detail.selling_price;
+        quantityCell.textContent = detail.quantity;
+        unitTotalCell.textContent = detail.selling_price * detail.quantity;
+      });
+    }
+  </script>
+</body>
+</html>

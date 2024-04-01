@@ -4,9 +4,9 @@ defmodule MiniEcommerce.Repo.Migrations.CreateCustomers do
   def change do
     create table(:customers) do
       add :full_name, :string
-      add :address, :string
+      add :address, :string, null: true
       add :phone, :string
-      add :birth, :date
+      add :birth, :date, null: true
 
       timestamps()
     end

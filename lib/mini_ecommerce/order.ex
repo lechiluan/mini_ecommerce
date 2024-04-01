@@ -5,10 +5,16 @@ defmodule MiniEcommerce.Orders do
   alias MiniEcommerce.Orders.Order
 
   def list_orders do
-    Repo.all(Order)
+    orders = from(o in Order, order_by: o.id)
+    |> Repo.all()
+    Repo.preload(orders, [:customer])
+    |> IO.inspect()
   end
 
-  def get_order!(id), do: Repo.get!(Order, id)
+  def get_order!(id) do
+    order = Repo.get!(Order, id)
+    Repo.preload(order, [:customer])
+  end
 
   def create_order(attrs \\ %{}) do
     %Order{}

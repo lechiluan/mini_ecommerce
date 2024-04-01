@@ -28,4 +28,10 @@ defmodule MiniEcommerce.OrderDetails do
   def delete_order_detail(order_detail) do
     Repo.delete(order_detail)
   end
+
+  def get_order_detail_by_order_code(order_code) do
+    order_code = to_string(order_code)
+    from(od in OrderDetail, where: od.order_code == ^order_code)
+    |> Repo.all()
+  end
 end

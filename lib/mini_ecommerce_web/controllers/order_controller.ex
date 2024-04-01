@@ -1,8 +1,17 @@
 defmodule MiniEcommerceWeb.OrderController do
   use MiniEcommerceWeb, :controller
 
+  alias MiniEcommerce.Repo
   alias MiniEcommerce.Orders
   alias MiniEcommerce.Orders.Order
+
+  def order(conn, _params) do
+    render(conn, "order.html")
+  end
+
+  def order_list(conn, _params) do
+    render(conn, "order_list.html")
+  end
 
   def index(conn, _params) do
     orders = Orders.list_orders()
@@ -18,8 +27,9 @@ defmodule MiniEcommerceWeb.OrderController do
     with {:ok, %Order{} = order} <- Orders.create_order(order_params) do
       conn
       |> put_status(:created)
-      |> render("show.json", order: order)
-    end
+      |> put_resp_header("location", Routes.order_path(conn, :show, order))
+      |> render("show.json", order: Repo.preload(order, :customer))
+     end
   end
 
   def update(conn, %{"id" => id, "order" => order_params}) do

@@ -1,1 +1,330 @@
-<h1> Hello  This is order page </h1>
+<h1>Create Order</h1>
+<div>
+  <label for="phone">Phone:</label>
+  <input type="text" id="phone" onblur="loadCustomerName(event)">
+  <label for="fullName">Full Name:</label>
+  <input type="text" id="fullName">
+  <input type="hidden" id="customerId">
+</div>
+
+<table class="table table-bordered" id="orderTable">
+  <thead>
+    <tr>
+      <th scope="col">No.</th>
+      <th scope="col">Product Code</th>
+      <th scope="col">Product Name</th>
+      <th scope="col">Selling Price</th>
+      <th scope="col">Quantity</th>
+      <th scope="col">Unit Total</th>
+      <th scope="col">Action</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+  <tfoot>
+    <tr>
+      <td colspan="5"><b>Total</b></td>
+      <td id="total">0</td>
+      <td></td>
+    </tr>
+  </tfoot>
+</table>
+
+<button onclick="openProductModal()">Add Product</button>
+
+<div id="productModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeProductModal()">&times;</span>
+    <h2>Add to Order</h2>
+    <select id="product-select" required>
+      <option value="">Select a product</option>
+    </select>
+    <button onclick="addToOrder(event)">Add</button>
+  </div>
+</div>
+
+<button onclick="createOrder()">Create Order</button>
+
+<script>
+  let customers = [];
+  let products = [];
+  let orderItems = [];
+  let orderCodeCounter = 1;
+
+  document.addEventListener("DOMContentLoaded", function () {
+      // Fetch customers from the API
+      fetch('/api/customers')
+          .then(response => response.json())
+          .then(data => {
+              customers = data.data;
+          })
+          .catch(error => console.error('Error fetching customers:', error));
+
+      // Load products from the API
+      fetch('/api/products')
+          .then(response => response.json())
+          .then(data => {
+              products = data.data;
+              renderProductSelect();
+          })
+          .catch(error => console.error('Error fetching products:', error));
+  });
+
+  console.log(generateOrderCode());
+
+  function generateOrderCode() {
+      // use timestamp as order code convert to string
+      return Date.now().toString();
+  }
+
+  // Define the loadCustomerName function globally
+  function loadCustomerName(event) {
+      const phone = event.target.value;
+      const customer = customers.find(c => c.phone === phone);
+
+      const fullNameInput = document.getElementById('fullName');
+      const customerIdInput = document.getElementById('customerId');
+      if (customer) {
+          fullNameInput.value = customer.full_name;
+          customerIdInput.value = customer.id;
+          fullNameInput.disabled = true;
+      } else {
+          fullNameInput.value = '';
+          customerIdInput.value = '';
+          fullNameInput.placeholder = 'Enter new customer name...';
+          fullNameInput.disabled = false;
+      }
+  }
+
+  function openProductModal() {
+      document.getElementById('productModal').style.display = 'block';
+  }
+
+  function closeProductModal() {
+      document.getElementById('productModal').style.display = 'none';
+  }
+
+  function renderProductSelect(data = products) {
+      const select = document.getElementById('product-select');
+      select.innerHTML = '';
+
+      // Create and append the default option
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Select a product';
+      select.appendChild(defaultOption);
+
+      // Iterate over the product data and create options
+      data.forEach(product => {
+          const option = document.createElement('option');
+          option.value = product.product_name;
+          option.textContent = product.product_name;
+          select.appendChild(option);
+      });
+  }
+
+  function addToOrder(event) {
+      const productSelect = document.getElementById('product-select');
+      const selectedProduct = productSelect.value;
+
+      if (!selectedProduct) {
+          alert('Please select a product.');
+          return;
+      }
+
+      const product = products.find(p => p.product_name === selectedProduct);
+      const quantity = prompt(`Enter quantity for ${product.product_name}:`);
+
+      if (quantity) {
+          const item = {
+              ...product,
+              quantity: parseInt(quantity),
+              unitTotal: product.selling_price * parseInt(quantity),
+          };
+          orderItems.push(item);
+          renderOrderTable();
+          calculateTotalPrice();
+      }
+      closeProductModal();
+  }
+
+  function renderOrderTable() {
+      const table = document.getElementById('orderTable').getElementsByTagName('tbody')[0];
+      table.innerHTML = '';
+      
+      renderProductSelect();
+
+      orderItems.forEach((item, index) => {
+          const row = table.insertRow();
+          const noCell = row.insertCell(0);
+          const codeCell = row.insertCell(1);
+          const nameCell = row.insertCell(2);
+          const priceCell = row.insertCell(3);
+          const quantityCell = row.insertCell(4);
+          const unitTotalCell = row.insertCell(5);
+          const actionCell = row.insertCell(6);
+
+          noCell.innerHTML = index + 1;
+          codeCell.innerHTML = item.product_code;
+          nameCell.innerHTML = item.product_name;
+          priceCell.innerHTML = item.selling_price;
+          quantityCell.innerHTML = item.quantity;
+          unitTotalCell.innerHTML = item.unitTotal;
+          actionCell.innerHTML = `<button onclick="removeFromOrder(${index})">Delete</button>`;
+          actionCell.innerHTML += `<button onclick="editOrderItem(${index})">Edit</button>`;
+      });
+  }
+
+  function editOrderItem(index) {
+      const item = orderItems[index];
+      const quantity = prompt(`Enter quantity for ${item.product_name}:`, item.quantity);
+
+      if (quantity) {
+          item.quantity = parseInt(quantity);
+          item.unitTotal = item.selling_price * parseInt(quantity);
+          renderOrderTable();
+          calculateTotalPrice();
+      }
+  }
+
+
+  function removeFromOrder(index) {
+      orderItems.splice(index, 1);
+      renderOrderTable();
+      calculateTotalPrice();
+  }
+
+  function calculateTotalPrice() {
+      const totalPrice = orderItems.reduce((total, item) => total + item.unitTotal, 0);
+      document.getElementById('total').textContent = totalPrice;
+  }
+
+
+
+
+
+
+  function createOrder() {
+    const phone = document.getElementById('phone').value;
+    const fullName = document.getElementById('fullName').value;
+    const customerId = document.getElementById('customerId').value;
+    const customer = customers.find(c => c.phone === phone) || { full_name: fullName };
+    const order = {
+      order: {
+        order_code: generateOrderCode(),
+        customer_id: customerId,
+        total_price: orderItems.reduce((total, item) => total + item.unitTotal, 0),
+      }
+    };
+
+    if (!customerId) {
+      // Customer not found, create a new customer first
+      createNewCustomer(customer)
+        .then(newCustomer => {
+          order.order.customer_id = newCustomer.id;
+          return sendOrder(order);
+        })
+        .then(() => {
+          alert('Order created successfully: ' + order.order.order_code);
+          // Reset the form
+          document.getElementById('phone').value = '';
+          document.getElementById('fullName').value = '';
+          orderItems = [];
+          renderOrderTable();
+          calculateTotalPrice();
+        })
+        .catch(error => console.error('Error creating order:', error));
+    } else {
+      sendOrder(order)
+        .then(() => {
+          alert('Order created successfully: ' + order.order.order_code);
+          // Reset the form
+          document.getElementById('phone').value = '';
+          document.getElementById('fullName').value = '';
+          orderItems = [];
+          renderOrderTable();
+          calculateTotalPrice();
+        })
+        .catch(error => console.error('Error creating order:', error));
+    }
+  }
+
+  function createNewCustomer(customer) {
+    const customerData = {
+      customer: {
+        full_name: customer.full_name,
+        phone: document.getElementById('phone').value,
+        address: null, // Address can be null
+        birth: null // Birth can be null
+      }
+    };
+
+    return fetch('/api/customers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(customerData)
+    })  
+    .then(response => {
+      if (response.ok) {
+        // Display alert if API call is successful
+        alert('Customer is ' + customer.full_name + ' created successfully');
+      } else {
+        // Handle error response
+        console.error('Error creating customer:', response.status);
+      }
+      return response.json();
+    })
+    .then(data => data.data)
+    .catch(error => console.error('Error creating customer:', error));
+  }
+
+
+  function sendOrder(order) {
+    return fetch('/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(order)
+    })
+    .then(response => {
+      if (response.ok) {
+        // Order created successfully, retrieve the order code
+        return response.json().then(data => data.data.order_code);
+      } else {
+        throw new Error('Error creating order');
+      }
+    })
+    .then(orderCode => {
+      // Send order details with the retrieved order code
+      return sendOrderDetails(orderItems, orderCode);
+    });
+  }
+
+
+  function sendOrderDetails(orderItems, orderCode) {
+    const promises = orderItems.map(item => {
+      const orderDetail = {
+        order_detail: {
+          order_code: orderCode,
+          product_code: item.product_code,
+          selling_price: item.selling_price,
+          quantity: item.quantity,
+          product_name: item.product_name,
+        }
+      };
+
+      return fetch('/api/order_details', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderDetail)
+      });
+    });
+
+    return Promise.all(promises);
+  }
+</script> 
+

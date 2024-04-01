@@ -15,7 +15,8 @@ defmodule MiniEcommerceWeb.OrderView do
       id: order.id,
       order_code: order.order_code,
       customer_id: order.customer_id,
-      total_price: order.total_price
+      total_price: order.total_price,
+      customer_name: order.customer.full_name
     }
   end
 end

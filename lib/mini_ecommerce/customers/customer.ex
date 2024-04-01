@@ -16,7 +16,7 @@ defmodule MiniEcommerce.Customers.Customer do
   @doc false
   def changeset(customer, attrs) do
     customer
-    |> cast(attrs, [:full_name, :address, :phone, :birth]) # cast the input
-    |> validate_required([:full_name, :address, :phone, :birth]) # validate the input
+    |> cast(attrs, [:full_name, :address, :phone, :birth])
+    |> validate_required([:full_name, :phone])
   end
 end

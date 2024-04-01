@@ -1,6 +1,7 @@
 /* This file is for your main application css. */
 @import "./phoenix.css";
-
+/* app.css */
+@import "./order.css";
 /* Alerts and form errors */
 .alert {
   padding: 15px;
@@ -158,23 +159,3 @@ footer {
   margin-top: 10px;
 }
 
-
-
-/* Additional CSS styles */
-.search-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-#search-input {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-right: 1rem;
-  flex-grow: 1;
-}
-
-.edit-btn {
-  background-color:  #007bff;
-}
