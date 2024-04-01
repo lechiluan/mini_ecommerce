@@ -131,9 +131,20 @@
           return;
       }
 
+      
       const product = products.find(p => p.product_name === selectedProduct);
       const quantity = prompt(`Enter quantity for ${product.product_name}:`);
 
+      // Check if product_code is already in orderItems plus the quantity in to current Quantity
+      const existingItem = orderItems.find(item => item.product_code === product.product_code);
+      if (existingItem) {
+          existingItem.quantity += parseInt(quantity);
+          existingItem.unitTotal = existingItem.selling_price * existingItem.quantity;
+          renderOrderTable();
+          calculateTotalPrice();
+          closeProductModal();
+          return;
+      }
       if (quantity) {
           const item = {
               ...product,

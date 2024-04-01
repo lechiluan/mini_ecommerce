@@ -1,119 +1,242 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order List</title>
-  <style>
-    table {
-      width: 100%;
-      border-collapse: collapse;
+<style>
+table {
+    width: 100%;
+    border-collapse: collapse;
     }
 
     th, td {
-      padding: 8px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
     }
 
     th {
-      background-color: #f2f2f2;
+    background-color: #f2f2f2;
+    }  
+
+    .form-control {
+        font-size: 16px;
     }
-  </style>
-</head>
-<body>
-  <h1>Order List</h1>
-  <table id="orderTable">
-    <thead>
-      <tr>
-        <th>No.</th>
-        <th>Order Code</th>
-        <th>Customer Name</th>
-        <th>Total Price</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    select.form-control:not([size]):not([multiple]) {
+        height: 35px; /* Assuming $input-height refers to a height value */
+    }
+</style>
+<h1>Order List</h1>
+<div class="input-group mb-3">
+    <input type="text" id="searchInput" class="form-control" placeholder="Enter order code or phone number">
+    <div class="input-group-append">
+      <button id="searchButton" class="btn btn-success" type="button">Search</button>
+    </div>
+</div>
+<div class="form-row">
+    <div class="form-group col-md-5">
+        <label for="priceRangeFilter">Filter by Price:</label>
+        <select id="priceRangeFilter" class="form-control" onchange="filterOrders(this.value)">
+            <option value="all">All</option>
+            <option value="less100">Less than 100</option>
+            <option value="100to500">100 to 500</option>
+            <option value="500to1000">500 to 1000</option>
+            <option value="greater1000">Greater than 1000</option>
+          </select>
+        </div>
+  <div class="form-group col-md-3">
+    <label for="startDate">From:</label>
+    <input type="date" id="startDate" class="form-control">
+  </div>
+  <div class="form-group col-md-3">
+    <label for="endDate">To:</label>
+    <input type="date" id="endDate" class="form-control">
+  </div>
+  <div class="form-group col-md-1">
+    <label for="filterButton">&nbsp;</label>
+    <button onclick="filterOrdersByDate()" class="btn btn-primary filter">Filter</button>
+  </div>
+</div>
 
-  <h2>Order Details</h2>
-  <table id="orderDetailsTable">
-    <thead>
-      <tr>
-        <th>No.</th>
-        <th>Product Code</th>
-        <th>Product Name</th>
-        <th>Selling Price</th>
-        <th>Quantity</th>
-        <th>Unit Total</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+</div>
+<table id="orderTable" class="table table-striped">
+<thead>
+    <tr>
+    <th>No.</th>
+    <th>Order Code</th>
+    <th>Customer Name</th>
+    <th>Customer Phone</th>
+    <th>Total Price</th>
+    <th>Order Date</th>
+    <th>Action</th>
+    </tr>
+</thead>
+<tbody></tbody>
+</table>
 
-  <script>
+<h2>Order Details</h2>
+<table id="orderDetailsTable" class="table table-bordered">
+<thead>
+    <tr>
+    <th>No.</th>
+    <th>Product Code</th>
+    <th>Product Name</th>
+    <th>Selling Price</th>
+    <th>Quantity</th>
+    <th>Unit Total</th>
+    </tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<script>
+    function filterOrdersByDate() {
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+    
+        // Check if both start date and end date are selected
+        if (!startDateInput.value || !endDateInput.value) {
+            // Display all orders if both dates are not selected
+            fetchOrders();
+            return;
+        }
+    
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+        endDate.setDate(endDate.getDate() + 1); // Include the end date in the range
+    
+        fetch('http://localhost:4000/api/orders/')
+            .then(response => response.json())
+            .then(data => {
+                const filteredOrders = data.data.filter(order => {
+                    const orderDate = new Date(order.inserted_at);
+                    return orderDate >= startDate && orderDate < endDate;
+                });
+                renderOrderTable(filteredOrders);
+            })
+            .catch(error => console.error('Error fetching orders:', error));
+    }
+    
+    function filterOrders(filterOption) {
+        fetch('http://localhost:4000/api/orders/')
+            .then(response => response.json())
+            .then(data => {
+                let filteredOrders;
+                switch (filterOption) {
+                    case 'less100':
+                        filteredOrders = data.data.filter(order => parseFloat(order.total_price) < 100);
+                        break;
+                    case '100to500':
+                        filteredOrders = data.data.filter(order => parseFloat(order.total_price) >= 100 && parseFloat(order.total_price) < 500);
+                        break;
+                    case '500to1000':
+                        filteredOrders = data.data.filter(order => parseFloat(order.total_price) >= 500 && parseFloat(order.total_price) < 1000);
+                        break;
+                    case 'greater1000':
+                        filteredOrders = data.data.filter(order => parseFloat(order.total_price) >= 1000);
+                        break;
+                    default:
+                        filteredOrders = data.data;
+                }
+                renderOrderTable(filteredOrders);
+            })
+            .catch(error => console.error('Error fetching orders:', error));
+    }
+    
+    
     const orderTable = document.getElementById('orderTable').getElementsByTagName('tbody')[0];
     const orderDetailsTable = document.getElementById('orderDetailsTable').getElementsByTagName('tbody')[0];
-
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    
     fetchOrders();
-
+    
     function fetchOrders() {
-      fetch('http://localhost:4000/api/orders/')
-        .then(response => response.json())
-        .then(data => {
-          renderOrderTable(data.data);
-        })
-        .catch(error => console.error('Error fetching orders:', error));
+        fetch('http://localhost:4000/api/orders/')
+            .then(response => response.json())
+            .then(data => {
+                renderOrderTable(data.data);
+            })
+            .catch(error => console.error('Error fetching orders:', error));
     }
-
+    
     function renderOrderTable(orders) {
-      orderTable.innerHTML = '';
-
-      orders.forEach(order => {
-        const row = orderTable.insertRow();
-        const noCell = row.insertCell(0);
-        const orderCodeCell = row.insertCell(1);
-        const customerNameCell = row.insertCell(2);
-        const totalPriceCell = row.insertCell(3);
-        const actionCell = row.insertCell(4);
-
-        noCell.textContent = orderTable.rows.length;
-        orderCodeCell.textContent = order.order_code;
-        customerNameCell.textContent = order.customer_name;
-        totalPriceCell.textContent = order.total_price;
-        actionCell.innerHTML = `<button onclick="showOrderDetails('${order.order_code}')">Show Details</button>`;
-      });
+        orderTable.innerHTML = '';
+        if (orders.length === 0) {
+            const row = orderTable.insertRow();
+            const cell = row.insertCell();
+            cell.textContent = 'No orders found.';
+        } else {
+            orders.forEach((order, index) => {
+                const row = orderTable.insertRow();
+                const noCell = row.insertCell(0);
+                const orderCodeCell = row.insertCell(1);
+                const customerNameCell = row.insertCell(2);
+                const customerPhoneCell = row.insertCell(3);
+                const totalPriceCell = row.insertCell(4);
+                const orderDateCell = row.insertCell(5);
+                const actionCell = row.insertCell(6);
+    
+                noCell.textContent = index + 1;
+                orderCodeCell.textContent = order.order_code;
+                customerNameCell.textContent = order.customer_name;
+                customerPhoneCell.textContent = order.customer_phone;
+                totalPriceCell.textContent = order.total_price;
+                orderDateCell.textContent = order.inserted_at.split('T')[0];
+                actionCell.innerHTML = `<button onclick="showOrderDetails('${order.order_code}')" class="btn btn-info">Details</button>`;
+            });
+        }
     }
-
+    
     function showOrderDetails(orderCode) {
-      fetch(`http://localhost:4000/api/get_order_detail_by_order_code/${orderCode}`)
-        .then(response => response.json())
-        .then(data => {
-          renderOrderDetailsTable(data.data);
-        })
-        .catch(error => console.error('Error fetching order details:', error));
+        fetch(`http://localhost:4000/api/get_order_detail_by_order_code/${orderCode}`)
+            .then(response => response.json())
+            .then(data => {
+                renderOrderDetailsTable(data.data);
+            })
+            .catch(error => console.error('Error fetching order details:', error));
     }
-
+    
     function renderOrderDetailsTable(orderDetails) {
-      orderDetailsTable.innerHTML = '';
-
-      orderDetails.forEach(detail => {
-        const row = orderDetailsTable.insertRow();
-        const noCell = row.insertCell(0);
-        const productCodeCell = row.insertCell(1);
-        const productNameCell = row.insertCell(2);
-        const sellingPriceCell = row.insertCell(3);
-        const quantityCell = row.insertCell(4);
-        const unitTotalCell = row.insertCell(5);
-
-        noCell.textContent = orderDetailsTable.rows.length;
-        productCodeCell.textContent = detail.product_code;
-        productNameCell.textContent = detail.product_name;
-        sellingPriceCell.textContent = detail.selling_price;
-        quantityCell.textContent = detail.quantity;
-        unitTotalCell.textContent = detail.selling_price * detail.quantity;
-      });
+        orderDetailsTable.innerHTML = '';
+    
+        orderDetails.forEach(detail => {
+            const row = orderDetailsTable.insertRow();
+            const noCell = row.insertCell(0);
+            const productCodeCell = row.insertCell(1);
+            const productNameCell = row.insertCell(2);
+            const sellingPriceCell = row.insertCell(3);
+            const quantityCell = row.insertCell(4);
+            const unitTotalCell = row.insertCell(5);
+    
+            noCell.textContent = orderDetailsTable.rows.length;
+            productCodeCell.textContent = detail.product_code;
+            productNameCell.textContent = detail.product_name;
+            sellingPriceCell.textContent = detail.selling_price;
+            quantityCell.textContent = detail.quantity;
+            unitTotalCell.textContent = detail.selling_price * detail.quantity;
+        });
     }
-  </script>
-</body>
-</html>
+    
+    searchButton.addEventListener('click', () => {
+        const searchValue = searchInput.value.trim();
+        if (searchValue === '') {
+            fetchOrders();
+        } else {
+            searchOrders(searchValue);
+        }
+    });
+    
+    searchInput.addEventListener('input', () => {
+        const searchValue = searchInput.value.trim();
+        if (searchValue === '') {
+            fetchOrders();
+        } else {
+            searchOrders(searchValue);
+        }
+    });
+    
+    function searchOrders(searchValue) {
+        fetch(`http://localhost:4000/api/search_orders/${searchValue}`)
+            .then(response => response.json())
+            .then(data => {
+                renderOrderTable(data.data);
+            })
+            .catch(error => console.error('Error searching orders:', error));
+    }
+</script>

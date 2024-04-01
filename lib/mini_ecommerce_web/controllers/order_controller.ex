@@ -29,7 +29,7 @@ defmodule MiniEcommerceWeb.OrderController do
       |> put_status(:created)
       |> put_resp_header("location", Routes.order_path(conn, :show, order))
       |> render("show.json", order: Repo.preload(order, :customer))
-     end
+    end
   end
 
   def update(conn, %{"id" => id, "order" => order_params}) do
@@ -46,5 +46,10 @@ defmodule MiniEcommerceWeb.OrderController do
     with {:ok, %Order{}} <- Orders.delete_order(order) do
       send_resp(conn, :no_content, "")
     end
+  end
+
+  def search(conn, %{"search" => search}) do
+    orders = Orders.search_orders(search)
+    render(conn, "index.json", orders: Repo.preload(orders, :customer))
   end
 end

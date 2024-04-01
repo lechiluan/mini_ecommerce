@@ -8,7 +8,6 @@ defmodule MiniEcommerce.Orders do
     orders = from(o in Order, order_by: o.id)
     |> Repo.all()
     Repo.preload(orders, [:customer])
-    |> IO.inspect()
   end
 
   def get_order!(id) do
@@ -35,4 +34,15 @@ defmodule MiniEcommerce.Orders do
   def change_order(%Order{} = order, attrs \\ %{}) do
     Order.changeset(order, attrs)
   end
+
+  def search_orders(search) do
+    search = to_string(search)
+
+    from(o in Order,
+      join: c in assoc(o, :customer),
+      where: ilike(o.order_code, ^"%#{search}%") or ilike(c.phone, ^"%#{search}%")
+    )
+    |> Repo.all()
+  end
+
 end

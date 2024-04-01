@@ -35,6 +35,7 @@ defmodule MiniEcommerceWeb.Router do
     resources "/orders", OrderController, except: [:new, :edit]
     resources "/order_details", OrderDetailController, except: [:new, :edit]
     get "/get_order_detail_by_order_code/:order_code", OrderDetailController, :get_order_detail_by_order_code
+    get "/search_orders/:search", OrderController, :search
   end
   # Enables LiveDashboard only for development
   #
