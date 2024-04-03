@@ -100,7 +100,7 @@ table {
         const endDate = new Date(endDateInput.value);
         endDate.setDate(endDate.getDate() + 1); // Include the end date in the range
     
-        fetch('http://localhost:4000/api/orders/')
+        fetch('/api/orders/')
             .then(response => response.json())
             .then(data => {
                 const filteredOrders = data.data.filter(order => {
@@ -113,7 +113,7 @@ table {
     }
     
     function filterOrders(filterOption) {
-        fetch('http://localhost:4000/api/orders/')
+        fetch('/api/orders/')
             .then(response => response.json())
             .then(data => {
                 let filteredOrders;
@@ -147,7 +147,7 @@ table {
     fetchOrders();
     
     function fetchOrders() {
-        fetch('http://localhost:4000/api/orders/')
+        fetch('/api/orders/')
             .then(response => response.json())
             .then(data => {
                 renderOrderTable(data.data);
@@ -184,7 +184,7 @@ table {
     }
     
     function showOrderDetails(orderCode) {
-        fetch(`http://localhost:4000/api/get_order_detail_by_order_code/${orderCode}`)
+        fetch(`/api/get_order_detail_by_order_code/${orderCode}`)
             .then(response => response.json())
             .then(data => {
                 renderOrderDetailsTable(data.data);
@@ -232,7 +232,7 @@ table {
     });
     
     function searchOrders(searchValue) {
-        fetch(`http://localhost:4000/api/search_orders/${searchValue}`)
+        fetch(`/api/search_orders/${searchValue}`)
             .then(response => response.json())
             .then(data => {
                 renderOrderTable(data.data);

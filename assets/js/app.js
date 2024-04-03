@@ -17,7 +17,7 @@ import "phoenix_html"
 
 // Fetch products from the API and display them
 function fetchProducts() {
-    fetch('http://localhost:4000/api/products')
+    fetch('/api/products')
         .then(response => response.json())
         .then(data => {
             displayProducts(data.data);
@@ -27,7 +27,7 @@ function fetchProducts() {
 
 
 function fetchBrands() {
-    fetch('http://localhost:4000/api/brands')
+    fetch('/api/brands')
         .then(response => response.json())
         .then(data => {
             const brandSelect = document.getElementById('brand-select');
@@ -155,7 +155,7 @@ function handleFormSubmit(event) {
 
         console.log(productData);
         console.log(productIdInput.value);
-        fetch(`http://localhost:4000/api/products/${productIdInput.value}`, {
+        fetch(`/api/products/${productIdInput.value}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -174,7 +174,7 @@ function handleFormSubmit(event) {
             .catch(error => console.error('Error updating product:', error));
     } else {
         console.log(JSON.stringify({ product: productData }));
-        fetch('http://localhost:4000/api/products', {
+        fetch('/api/products', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -201,7 +201,7 @@ function handleDelete(productId) {
         return;
     }
     else {
-        fetch(`http://localhost:4000/api/products/${productId}`, {
+        fetch(`/api/products/${productId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
